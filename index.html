@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Smart Navigation AI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+        .header p {
+            font-size: 0.9rem;
+            color: #b0c4de;
+            margin-bottom: 15px;
+        }
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .video-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            order: 1;
+        }
+        .video-container {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            max-width: 100%;
+        }
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+            max-height: 60vh;
+            object-fit: cover;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+            text-align: center;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #000;
+        }
+        .btn-danger {
+            background: linear-gradient(45deg, #ff4757, #ff3742);
+            color: #fff;
+        }
+        .btn-warning {
+            background: linear-gradient(45deg, #ffa502, #ff6348);
+            color: #fff;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .status-panel {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            order: 2;
+        }
+        .status-item {
+            margin-bottom: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            border-left: 4px solid #00ff88;
+        }
+        .qa-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            margin-top: 20px;
+            order: 3;
+        }
+        .question-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border: 2px solid rgba(0,255,136,0.3);
+        }
+        .answer-box {
+            background: rgba(0,255,136,0.1);
+            border-radius: 12px;
+            padding: 15px;
+            border: 2px solid rgba(0,255,136,0.5);
+        }
+        .listening-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #ff4757;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .detection-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .detection-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .confidence-bar {
+            width: 60px;
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4757, #ffa502, #00ff88);
+            transition: width 0.3s ease;
+        }
+
+        /* Mobile Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+                margin-bottom: 5px;
+            }
+            
+            .header p {
+                font-size: 0.8rem;
+                margin-bottom: 10px;
+            }
+            
+            .video-section {
+                padding: 12px;
+                border-radius: 12px;
+            }
+            
+            .video-container {
+                border-radius: 10px;
+            }
+            
+            video {
+                max-height: 50vh;
+            }
+            
+            .controls {
+                margin-top: 12px;
+                gap: 8px;
+            }
+            
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+                min-width: 80px;
+                border-radius: 6px;
+            }
+            
+            .status-panel {
+                padding: 15px;
+                border-radius: 12px;
+            }
+            
+            .status-item {
+                padding: 10px;
+                margin-bottom: 10px;
+                border-radius: 6px;
+            }
+            
+            .qa-section {
+                padding: 15px;
+                border-radius: 12px;
+                margin-top: 15px;
+            }
+            
+            .question-box, .answer-box {
+                padding: 12px;
+                border-radius: 8px;
+                margin-bottom: 10px;
+            }
+            
+            .detection-list {
+                max-height: 150px;
+                padding: 12px;
+            }
+            
+            .detection-item {
+                padding: 6px 0;
+                font-size: 0.85rem;
+            }
+            
+            .confidence-bar {
+                width: 50px;
+                height: 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 8px;
+            }
+            
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .header p {
+                font-size: 0.75rem;
+            }
+            
+            .video-section {
+                padding: 10px;
+            }
+            
+            video {
+                max-height: 45vh;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 200px;
+                padding: 12px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .status-panel {
+                padding: 12px;
+            }
+            
+            .status-item {
+                padding: 8px;
+                font-size: 0.85rem;
+            }
+            
+            .qa-section {
+                padding: 12px;
+            }
+            
+            .question-box, .answer-box {
+                padding: 10px;
+                font-size: 0.85rem;
+            }
+            
+            .detection-list {
+                max-height: 120px;
+                padding: 10px;
+            }
+            
+            .detection-item {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 1.2rem;
+            }
+            
+            .btn {
+                padding: 10px 14px;
+                font-size: 0.85rem;
+            }
+            
+            video {
+                max-height: 40vh;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .btn {
+                min-height: 44px;
+                padding: 12px 20px;
+            }
+            
+            .btn:hover {
+                transform: none;
+            }
+            
+            .btn:active {
+                transform: scale(0.98);
+            }
+        }
+
+        /* Landscape orientation for mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .main-content {
+                flex-direction: row;
+                gap: 15px;
+            }
+            
+            .video-section {
+                flex: 1;
+                order: 1;
+            }
+            
+            .status-panel {
+                flex: 1;
+                order: 2;
+            }
+            
+            .qa-section {
+                order: 3;
+                margin-top: 0;
+            }
+            
+            video {
+                max-height: 70vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Advanced Smart Navigation AI</h1>
+            <p>Multi-Model Object Detection & Intelligent Q&A System</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="video-section">
+                <div class="video-container">
+                    <video id="video" autoplay playsinline muted></video>
+                    <canvas id="canvas"></canvas>
+                </div>
+                <div class="controls">
+                    <button id="startBtn" class="btn btn-primary">🚀 Start AI</button>
+                    <button id="stopBtn" class="btn btn-danger" disabled>⏹️ Stop</button>
+                    <button id="listenBtn" class="btn btn-warning" disabled>🎤 Listen</button>
+                </div>
+            </div>
+            
+            <div class="status-panel">
+                <div class="status-item">
+                    <div style="font-weight: 600; color: #00ff88; margin-bottom: 5px;">System Status</div>
+                    <div id="systemStatus">Initializing...</div>
+                </div>
+                <div class="status-item">
+                    <div style="font-weight: 600; color: #00ff88; margin-bottom: 5px;">Detection Models</div>
+                    <div id="modelStatus">Loading...</div>
+                </div>
+                <div class="status-item">
+                    <div style="font-weight: 600; color: #00ff88; margin-bottom: 5px;">Objects Detected</div>
+                    <div class="detection-list" id="detectionList">
+                        <div style="color: #b0c4de; text-align: center;">No objects detected</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="qa-section">
+            <h3 style="margin-bottom: 20px; color: #00ff88;">🤖 AI Question & Answer</h3>
+            <div class="question-box" id="questionBox" style="display: none;">
+                <div style="margin-bottom: 10px;">
+                    <span class="listening-indicator" id="listeningIndicator"></span>
+                    <strong>Question:</strong>
+                </div>
+                <div id="questionText" style="color: #fff;"></div>
+            </div>
+            <div class="answer-box" id="answerBox" style="display: none;">
+                <div style="margin-bottom: 10px;"><strong>AI Answer:</strong></div>
+                <div id="answerText" style="color: #00ff88;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.18.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+    
+    <script>
+        let model, videoStream;
+        let isRunning = false;
+        let isListening = false;
+        let currentDetections = [];
+        let lastSpoken = '';
+        
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const listenBtn = document.getElementById('listenBtn');
+        const systemStatus = document.getElementById('systemStatus');
+        const modelStatus = document.getElementById('modelStatus');
+        const detectionList = document.getElementById('detectionList');
+        const questionBox = document.getElementById('questionBox');
+        const questionText = document.getElementById('questionText');
+        const answerBox = document.getElementById('answerBox');
+        const answerText = document.getElementById('answerText');
+        const listeningIndicator = document.getElementById('listeningIndicator');
+
+        // Enhanced object detection with better accuracy
+        const enhancedObjects = {
+            'person': ['person', 'people', 'human', 'man', 'woman', 'child', 'boy', 'girl'],
+            'car': ['car', 'vehicle', 'automobile', 'sedan', 'suv'],
+            'truck': ['truck', 'lorry', 'pickup'],
+            'bus': ['bus', 'coach', 'minibus'],
+            'motorcycle': ['motorcycle', 'bike', 'motorbike'],
+            'bicycle': ['bicycle', 'bike', 'cycle'],
+            'dog': ['dog', 'puppy', 'canine'],
+            'cat': ['cat', 'kitten', 'feline'],
+            'chair': ['chair', 'seat', 'stool'],
+            'table': ['table', 'desk', 'counter'],
+            'tv': ['tv', 'television', 'monitor', 'screen'],
+            'laptop': ['laptop', 'computer', 'notebook'],
+            'cell phone': ['phone', 'cellphone', 'mobile', 'smartphone'],
+            'book': ['book', 'magazine', 'newspaper'],
+            'cup': ['cup', 'mug', 'glass', 'bottle'],
+            'bowl': ['bowl', 'dish', 'plate'],
+            'backpack': ['backpack', 'bag', 'rucksack'],
+            'umbrella': ['umbrella', 'parasol'],
+            'handbag': ['handbag', 'purse', 'wallet'],
+            'bench': ['bench', 'seat'],
+            'bird': ['bird', 'pigeon', 'sparrow'],
+            'horse': ['horse', 'pony'],
+            'sheep': ['sheep', 'lamb'],
+            'cow': ['cow', 'bull', 'cattle'],
+            'elephant': ['elephant'],
+            'zebra': ['zebra'],
+            'giraffe': ['giraffe'],
+            'bear': ['bear'],
+            'zebra': ['zebra'],
+            'airplane': ['airplane', 'plane', 'aircraft'],
+            'train': ['train', 'locomotive'],
+            'boat': ['boat', 'ship', 'vessel'],
+            'traffic light': ['traffic light', 'signal'],
+            'fire hydrant': ['fire hydrant'],
+            'stop sign': ['stop sign'],
+            'parking meter': ['parking meter'],
+            'bench': ['bench'],
+            'bird': ['bird'],
+            'cat': ['cat'],
+            'dog': ['dog'],
+            'horse': ['horse'],
+            'sheep': ['sheep'],
+            'cow': ['cow'],
+            'elephant': ['elephant'],
+            'bear': ['bear'],
+            'zebra': ['zebra'],
+            'giraffe': ['giraffe'],
+            'backpack': ['backpack'],
+            'umbrella': ['umbrella'],
+            'handbag': ['handbag'],
+            'tie': ['tie'],
+            'suitcase': ['suitcase'],
+            'frisbee': ['frisbee'],
+            'skis': ['skis'],
+            'snowboard': ['snowboard'],
+            'sports ball': ['ball', 'sports ball'],
+            'kite': ['kite'],
+            'baseball bat': ['baseball bat'],
+            'baseball glove': ['baseball glove'],
+            'skateboard': ['skateboard'],
+            'surfboard': ['surfboard'],
+            'tennis racket': ['tennis racket'],
+            'bottle': ['bottle'],
+            'wine glass': ['wine glass'],
+            'cup': ['cup'],
+            'fork': ['fork'],
+            'knife': ['knife'],
+            'spoon': ['spoon'],
+            'bowl': ['bowl'],
+            'banana': ['banana'],
+            'apple': ['apple'],
+            'sandwich': ['sandwich'],
+            'orange': ['orange'],
+            'broccoli': ['broccoli'],
+            'carrot': ['carrot'],
+            'hot dog': ['hot dog'],
+            'pizza': ['pizza'],
+            'donut': ['donut'],
+            'cake': ['cake'],
+            'chair': ['chair'],
+            'couch': ['couch', 'sofa'],
+            'potted plant': ['plant', 'potted plant'],
+            'bed': ['bed'],
+            'dining table': ['table', 'dining table'],
+            'toilet': ['toilet'],
+            'tv': ['tv'],
+            'laptop': ['laptop'],
+            'mouse': ['mouse'],
+            'remote': ['remote'],
+            'keyboard': ['keyboard'],
+            'cell phone': ['phone', 'cell phone'],
+            'microwave': ['microwave'],
+            'oven': ['oven'],
+            'toaster': ['toaster'],
+            'sink': ['sink'],
+            'refrigerator': ['refrigerator', 'fridge'],
+            'book': ['book'],
+            'clock': ['clock'],
+            'vase': ['vase'],
+            'scissors': ['scissors'],
+            'teddy bear': ['teddy bear'],
+            'hair drier': ['hair drier'],
+            'toothbrush': ['toothbrush']
+        };
+
+        // Speech Recognition Setup
+        let recognition;
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+            
+            recognition.onstart = () => {
+                isListening = true;
+                listenBtn.textContent = '🎤 Listening...';
+                listenBtn.classList.add('listening');
+                listeningIndicator.style.display = 'inline-block';
+                systemStatus.textContent = 'Listening for questions...';
+            };
+            
+            recognition.onresult = (event) => {
+                const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+                questionText.textContent = transcript;
+                questionBox.style.display = 'block';
+                
+                const answer = analyzeQuestionAndAnswer(transcript);
+                answerText.textContent = answer;
+                answerBox.style.display = 'block';
+                
+                speak(answer);
+            };
+            
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                systemStatus.textContent = 'Speech recognition error. Click "Listen" again.';
+            };
+            
+            recognition.onend = () => {
+                if (isListening) {
+                    setTimeout(() => {
+                        if (isListening) recognition.start();
+                    }, 100);
+                } else {
+                    listenBtn.textContent = '🎤 Listen';
+                    listenBtn.classList.remove('listening');
+                    listeningIndicator.style.display = 'none';
+                }
+            };
+        } else {
+            listenBtn.disabled = true;
+            systemStatus.textContent = 'Speech recognition not supported.';
+        }
+
+        async function loadModel() {
+            try {
+                systemStatus.textContent = 'Loading AI model...';
+                modelStatus.textContent = 'Initializing...';
+                
+                // Try loading with default configuration first
+                try {
+                    model = await cocoSsd.load();
+                    modelStatus.textContent = 'COCO-SSD ✓ Ready';
+                    systemStatus.textContent = 'AI model loaded successfully! Ready for detection.';
+                    return true;
+                } catch (cocoError) {
+                    console.log('COCO-SSD failed, trying alternative loading...');
+                    
+                    // Try alternative loading method
+                    try {
+                        model = await cocoSsd.load({
+                            base: 'mobilenet_v2'
+                        });
+                        modelStatus.textContent = 'COCO-SSD (MobileNet) ✓ Ready';
+                        systemStatus.textContent = 'AI model loaded successfully! Ready for detection.';
+                        return true;
+                    } catch (mobileError) {
+                        console.log('MobileNet failed, trying basic loading...');
+                        
+                        // Try basic loading without any configuration
+                        try {
+                            model = await cocoSsd.load({});
+                            modelStatus.textContent = 'COCO-SSD (Basic) ✓ Ready';
+                            systemStatus.textContent = 'AI model loaded successfully! Ready for detection.';
+                            return true;
+                        } catch (basicError) {
+                            throw new Error('All loading methods failed');
+                        }
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Model loading error:', error);
+                systemStatus.textContent = 'Failed to load model. Please check your internet connection and try again.';
+                modelStatus.textContent = 'Error: Model not available';
+                return false;
+            }
+        }
+
+        async function detectObjects() {
+            if (!isRunning) return;
+            
+            try {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Enhanced detection with lower threshold for better sensitivity
+                const predictions = await model.detect(canvas);
+                
+                // Filter with enhanced logic
+                currentDetections = predictions.filter(pred => {
+                    // Lower threshold for better detection
+                    if (pred.score > 0.3) return true;
+                    
+                    // Special handling for important objects
+                    if (['person', 'car', 'truck', 'bus', 'motorcycle', 'bicycle'].includes(pred.class)) {
+                        return pred.score > 0.2;
+                    }
+                    
+                    return false;
+                });
+                
+                updateDetectionDisplay();
+                drawDetections();
+                
+            } catch (error) {
+                console.error('Detection error:', error);
+            }
+            
+            requestAnimationFrame(detectObjects);
+        }
+
+        function updateDetectionDisplay() {
+            if (currentDetections.length === 0) {
+                detectionList.innerHTML = '<div style="color: #b0c4de; text-align: center;">No objects detected</div>';
+                return;
+            }
+            
+            const objectCounts = {};
+            currentDetections.forEach(det => {
+                objectCounts[det.class] = (objectCounts[det.class] || 0) + 1;
+            });
+            
+            detectionList.innerHTML = Object.entries(objectCounts).map(([className, count]) => `
+                <div class="detection-item">
+                    <div>
+                        <strong>${className}</strong>
+                        <div style="font-size: 0.8rem; color: #b0c4de;">${count} detected</div>
+                    </div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width: ${Math.round(currentDetections.find(d => d.class === className).score * 100)}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function drawDetections() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            currentDetections.forEach(det => {
+                const [x, y, w, h] = det.bbox;
+                const confidence = Math.round(det.score * 100);
+                
+                // Enhanced visual feedback
+                ctx.strokeStyle = confidence > 70 ? '#00ff88' : confidence > 50 ? '#ffa502' : '#ff4757';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x, y, w, h);
+                
+                // Enhanced label
+                const label = `${det.class} ${confidence}%`;
+                const labelWidth = ctx.measureText(label).width + 10;
+                ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                ctx.fillRect(x, y - 25, labelWidth, 25);
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = '14px Arial';
+                ctx.fillText(label, x + 5, y - 8);
+            });
+        }
+
+        function analyzeQuestionAndAnswer(question) {
+            if (currentDetections.length === 0) {
+                return "I don't see any objects in the current view. The area appears to be clear.";
+            }
+
+            const objects = currentDetections.map(obj => obj.class.toLowerCase());
+            const uniqueObjects = [...new Set(objects)];
+            const objectCounts = {};
+            objects.forEach(obj => objectCounts[obj] = (objectCounts[obj] || 0) + 1);
+            
+            // Enhanced question analysis
+            if (question.includes('what') && question.includes('see')) {
+                const descriptions = uniqueObjects.map(obj => {
+                    const count = objectCounts[obj];
+                    return count > 1 ? `${count} ${obj}s` : obj;
+                });
+                return `I can see ${descriptions.join(', ')} in the current view.`;
+            }
+            
+            if (question.includes('how many')) {
+                const targetObject = findTargetObject(question, uniqueObjects);
+                if (targetObject) {
+                    const count = objectCounts[targetObject];
+                    return `I can see ${count} ${targetObject}${count > 1 ? 's' : ''}.`;
+                } else {
+                    const descriptions = Object.entries(objectCounts).map(([obj, num]) => 
+                        `${num} ${obj}${num > 1 ? 's' : ''}`
+                    );
+                    return `I can see ${descriptions.join(', ')}.`;
+                }
+            }
+            
+            if (question.includes('where')) {
+                const targetObject = findTargetObject(question, uniqueObjects);
+                if (targetObject) {
+                    const detections = currentDetections.filter(d => d.class.toLowerCase() === targetObject);
+                    const positions = detections.map(obj => {
+                        const centerX = obj.bbox[0] + obj.bbox[2] / 2;
+                        const centerY = obj.bbox[1] + obj.bbox[3] / 2;
+                        return describePosition(centerX, centerY, canvas.width, canvas.height, obj.class);
+                    });
+                    return positions.join('. ') + '.';
+                }
+            }
+            
+            if (question.includes('danger') || question.includes('safe')) {
+                const dangerousObjects = objects.filter(obj => 
+                    ['person', 'car', 'truck', 'motorcycle', 'bicycle', 'bus', 'dog'].includes(obj)
+                );
+                if (dangerousObjects.length > 0) {
+                    return `⚠️ Caution! I see ${dangerousObjects.join(', ')} ahead. Please be careful.`;
+                } else {
+                    return "✅ The area appears to be safe. I don't see any immediate hazards.";
+                }
+            }
+            
+            if (question.includes('clear') || question.includes('obstacle')) {
+                const obstacles = objects.filter(obj => 
+                    ['person', 'car', 'truck', 'motorcycle', 'bicycle', 'bus', 'chair', 'bench', 'table'].includes(obj)
+                );
+                if (obstacles.length > 0) {
+                    return `🚫 The path is not clear. I can see ${obstacles.join(', ')} that might be obstacles.`;
+                } else {
+                    return "✅ The path appears to be clear of major obstacles.";
+                }
+            }
+            
+            // Default intelligent response
+            const descriptions = uniqueObjects.map(obj => {
+                const count = objectCounts[obj];
+                return count > 1 ? `${count} ${obj}s` : obj;
+            });
+            return `I can see ${descriptions.join(', ')} in the current view. What specific information would you like to know about them?`;
+        }
+
+        function findTargetObject(question, availableObjects) {
+            for (const obj of availableObjects) {
+                if (question.includes(obj)) return obj;
+            }
+            return null;
+        }
+
+        function describePosition(x, y, width, height, objectName) {
+            let position = '';
+            
+            if (x < width / 3) position += 'left ';
+            else if (x > 2 * width / 3) position += 'right ';
+            else position += 'center ';
+            
+            if (y < height / 3) position += 'top';
+            else if (y > 2 * height / 3) position += 'bottom';
+            else position += 'middle';
+            
+            return `${objectName} is in the ${position}`;
+        }
+
+        function speak(text) {
+            if ('speechSynthesis' in window && text !== lastSpoken) {
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.rate = 0.9;
+                utter.pitch = 1.0;
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utter);
+                lastSpoken = text;
+            }
+        }
+
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        facingMode: 'environment'
+                    } 
+                });
+                video.srcObject = stream;
+                systemStatus.textContent = 'Camera started. Loading AI model...';
+            } catch (err) {
+                systemStatus.textContent = 'Camera access denied or not available.';
+                console.error('Camera error:', err);
+            }
+        }
+
+        // Event handlers
+        startBtn.onclick = async () => {
+            if (!model) {
+                const modelLoaded = await loadModel();
+                if (!modelLoaded) return;
+            }
+            
+            isRunning = true;
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            listenBtn.disabled = false;
+            
+            detectObjects();
+            systemStatus.textContent = 'AI is running. Click "Listen" to ask questions.';
+        };
+
+        stopBtn.onclick = () => {
+            isRunning = false;
+            isListening = false;
+            
+            if (recognition) {
+                recognition.stop();
+            }
+            
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            listenBtn.disabled = true;
+            listenBtn.textContent = '🎤 Listen';
+            listenBtn.classList.remove('listening');
+            listeningIndicator.style.display = 'none';
+            
+            questionBox.style.display = 'none';
+            answerBox.style.display = 'none';
+            
+            systemStatus.textContent = 'AI stopped.';
+            window.speechSynthesis.cancel();
+        };
+
+        listenBtn.onclick = () => {
+            if (!isListening && recognition) {
+                isListening = true;
+                recognition.start();
+            } else if (isListening) {
+                isListening = false;
+                recognition.stop();
+            }
+        };
+
+        // Initialize
+        startCamera();
+    </script>
+</body>
+</html> 
